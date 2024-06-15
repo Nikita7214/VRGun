@@ -1,34 +1,46 @@
 using UnityEngine;
-using UnityEngine.XR;
-using UnityEngine.XR.Management;
+using System.Collections;
 
 public class PlayerCalibration : MonoBehaviour
 {
-    public GameObject calibrationMarker; // GameObject, представляющий точку калибровки
-    private Vector3 calibrationPosition; // Позиция точки калибровки
-    private Quaternion calibrationRotation; // Ориентация точки калибровки
-
-    private void Start()
+    public Transform rightController;
+    public float calibrationDistance = 1f; // Расстояние для второй точки калибрации
+    private bool isCalibrating = false;
+    private Vector3 calibrationOrigin;
+    private Quaternion calibrationRotation;
+    
+    private void Update()
     {
-        calibrationPosition = calibrationMarker.transform.position;
-        calibrationRotation = calibrationMarker.transform.rotation;
-        
-        XRInputSubsystem xrInputSubsystem = null;
-        if (XRGeneralSettings.Instance != null && XRGeneralSettings.Instance.Manager != null)
+        if (Input.GetButtonDown("RightControllerABButton") && !isCalibrating)
         {
-            xrInputSubsystem = XRGeneralSettings.Instance.Manager.activeLoader.GetLoadedSubsystem<XRInputSubsystem>();
-            xrInputSubsystem.trackingOriginUpdated += OnTrackingOriginUpdated;
+            StartCalibration();
+        }
+        else if (Input.GetButtonDown("RightControllerABButton") && isCalibrating)
+        {
+            FinishCalibration();
         }
     }
 
-    private void OnTrackingOriginUpdated(XRInputSubsystem xrInputSubsystem)
+    private void StartCalibration()
     {
-        // Устанавливаем точку калибровки в качестве новой точки отсчета трекинга
-        xrInputSubsystem.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);
-        xrInputSubsystem.TryRecenter();
+        isCalibrating = true;
+        calibrationOrigin = rightController.position;
+        calibrationRotation = rightController.rotation;
+        Debug.Log("Начата калибровка. Держите правый контроллер в первой точке.");
+    }
 
-        // Устанавливаем позицию и ориентацию игрока в соответствии с точкой калибровки
-        transform.position = calibrationPosition;
+    private void FinishCalibration()
+    {
+        isCalibrating = false;
+
+        // Перемещаем игрока в нулевую точку
+        transform.position = calibrationOrigin;
         transform.rotation = calibrationRotation;
+
+        // Устанавливаем направление взгляда игрока
+        Vector3 secondCalibrationPoint = calibrationOrigin + (rightController.forward * calibrationDistance);
+        transform.LookAt(secondCalibrationPoint);
+
+        Debug.Log("Калибровка завершена. Игрок перемещён в нулевую точку и ориентирован на вторую точку калибрации.");
     }
 }
