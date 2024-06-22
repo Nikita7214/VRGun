@@ -4,7 +4,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class VRCalibration : MonoBehaviour
 {
-    public GameObject player;
+    public GameObject xrOrigin;
     public GameObject calibrationPoint1;
     public GameObject calibrationPoint3;
     public ActionBasedController rightController;
@@ -18,8 +18,8 @@ public class VRCalibration : MonoBehaviour
 
     void Update()
     {
-        bool primaryButtonPressed = rightController.selectAction.action.ReadValue<float>() > 0.5f;
-        bool secondaryButtonPressed = rightController.activateAction.action.ReadValue<float>() > 0.5f;
+        bool primaryButtonPressed = rightController.activateAction.action.ReadValue<float>() > 0.5f;
+        bool secondaryButtonPressed = rightController.uiPressAction.action.ReadValue<float>() > 0.5f;
 
         if (primaryButtonPressed && secondaryButtonPressed)
         {
@@ -35,7 +35,7 @@ public class VRCalibration : MonoBehaviour
             {
                 if (!isCalibrated)
                 {
-                    CalibratePosition();
+                    CalibratePositionAndOrientation();
                 }
                 else if (Time.time - lastCalibrationTime > calibrationCooldown)
                 {
@@ -51,26 +51,27 @@ public class VRCalibration : MonoBehaviour
         }
     }
 
-    private void CalibratePosition()
+    private void CalibratePositionAndOrientation()
     {
-        player.transform.position = calibrationPoint1.transform.position;
+        // Калибровка позиции
+        xrOrigin.transform.position = calibrationPoint1.transform.position;
+
+        // Калибровка ориентации
+        Vector3 directionToCalibrationPoint3 = calibrationPoint3.transform.position - calibrationPoint1.transform.position;
+        Quaternion targetSceneRotation = Quaternion.LookRotation(directionToCalibrationPoint3);
+        xrOrigin.transform.rotation = targetSceneRotation;
+
         isCalibrated = true;
         lastCalibrationTime = Time.time;
-        Debug.Log("Player calibrated to position at Calibration Point 1.");
+        Debug.Log("XR Origin calibrated to position and orientation at Calibration Point 1 and 3.");
     }
 
     private void CalibrateOrientation()
     {
-        Vector3 directionToController = rightController.transform.position - calibrationPoint1.transform.position;
-        directionToController.y = 0;
+        Vector3 directionToCalibrationPoint3 = calibrationPoint3.transform.position - calibrationPoint1.transform.position;
+        Quaternion targetSceneRotation = Quaternion.LookRotation(directionToCalibrationPoint3);
+        xrOrigin.transform.rotation = targetSceneRotation;
 
-        player.transform.rotation = Quaternion.LookRotation(directionToController);
-        Debug.Log("Player orientation calibrated to face the Right Controller.");
-
-        Vector3 directionToCalibrationPoint3 = calibrationPoint3.transform.position - rightController.transform.position;
-        directionToCalibrationPoint3.y = 0;
-
-        player.transform.rotation = Quaternion.LookRotation(directionToCalibrationPoint3);
-        Debug.Log("Player orientation calibrated to align with Calibration Point 3.");
+        Debug.Log("XR Origin orientation calibrated to face the Calibration Point 3.");
     }
 }
