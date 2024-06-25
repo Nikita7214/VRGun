@@ -5,8 +5,8 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class OculusVRCalibration : MonoBehaviour
 {
-    public GameObject sceneRoot;
-    public GameObject calibrationPoint;
+    public GameObject calibrationPoint1;
+    public GameObject calibrationPoint2;
     public ActionBasedController rightController;
     public XROrigin xrOrigin;
 
@@ -62,12 +62,17 @@ public class OculusVRCalibration : MonoBehaviour
     private void CalibratePosition()
     {
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
-        Vector3 cameraOffset = Camera.main.transform.position - calibrationPoint.transform.position;
+
+        // Рассчитываем среднее смещение между двумя точками калибровки и камерой
+        Vector3 cameraOffset1 = Camera.main.transform.position - calibrationPoint1.transform.position;
+        Vector3 cameraOffset2 = Camera.main.transform.position - calibrationPoint2.transform.position;
+        Vector3 cameraOffset = (cameraOffset1 + cameraOffset2) / 2f;
+
         xrOrigin.transform.position = oculusPosition - cameraOffset;
 
         isCalibrated = true;
         lastCalibrationTime = Time.time;
-        Debug.Log("Scene calibrated to position at Calibration Point.");
+        Debug.Log("Scene calibrated to position between Calibration Points.");
     }
 
     private void CalibrateOrientation()
