@@ -1,13 +1,14 @@
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class VRCalibration : MonoBehaviour
+public class OculusVRCalibration : MonoBehaviour
 {
-    public GameObject xrOrigin;
-    public GameObject calibrationPoint1;
-    public GameObject calibrationPoint3;
+    public GameObject sceneRoot;
+    public GameObject calibrationPoint;
     public ActionBasedController rightController;
+    public XROrigin xrOrigin;
 
     private bool isCalibrated = false;
     private bool isButtonHeld = false;
@@ -15,6 +16,13 @@ public class VRCalibration : MonoBehaviour
     private float buttonHoldTimer = 0.0f;
     private float calibrationCooldown = 2.0f;
     private float lastCalibrationTime = 0.0f;
+
+    private XRNode oculusNode = XRNode.Head;
+
+    void Start()
+    {
+        ResetSceneTransform();
+    }
 
     void Update()
     {
@@ -35,7 +43,7 @@ public class VRCalibration : MonoBehaviour
             {
                 if (!isCalibrated)
                 {
-                    CalibratePositionAndOrientation();
+                    CalibratePosition();
                 }
                 else if (Time.time - lastCalibrationTime > calibrationCooldown)
                 {
@@ -51,27 +59,33 @@ public class VRCalibration : MonoBehaviour
         }
     }
 
-    private void CalibratePositionAndOrientation()
+    private void CalibratePosition()
     {
-        // Калибровка позиции
-        xrOrigin.transform.position = calibrationPoint1.transform.position;
-
-        // Калибровка ориентации
-        Vector3 directionToCalibrationPoint3 = calibrationPoint3.transform.position - calibrationPoint1.transform.position;
-        Quaternion targetSceneRotation = Quaternion.LookRotation(directionToCalibrationPoint3);
-        xrOrigin.transform.rotation = targetSceneRotation;
+        InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
+        Vector3 cameraOffset = Camera.main.transform.position - calibrationPoint.transform.position;
+        xrOrigin.transform.position = oculusPosition - cameraOffset;
 
         isCalibrated = true;
         lastCalibrationTime = Time.time;
-        Debug.Log("XR Origin calibrated to position and orientation at Calibration Point 1 and 3.");
+        Debug.Log("Scene calibrated to position at Calibration Point.");
     }
 
     private void CalibrateOrientation()
     {
-        Vector3 directionToCalibrationPoint3 = calibrationPoint3.transform.position - calibrationPoint1.transform.position;
-        Quaternion targetSceneRotation = Quaternion.LookRotation(directionToCalibrationPoint3);
-        xrOrigin.transform.rotation = targetSceneRotation;
+        Vector3 directionToController = rightController.transform.position - Camera.main.transform.position;
+        directionToController.y = 0;
 
-        Debug.Log("XR Origin orientation calibrated to face the Calibration Point 3.");
+        Quaternion currentSceneRotation = xrOrigin.transform.rotation;
+        Quaternion targetSceneRotation = Quaternion.LookRotation(directionToController);
+        xrOrigin.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
+
+        Debug.Log("Scene orientation calibrated to face the Right Controller.");
+    }
+
+    private void ResetSceneTransform()
+    {
+        InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
+        InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.deviceRotation, out var oculusRotation);
+        xrOrigin.transform.SetPositionAndRotation(oculusPosition, oculusRotation);
     }
 }

@@ -685,6 +685,22 @@ MonoBehaviour:
   bluePlatform: {fileID: 430398264}
   redPlatform: {fileID: 209334812}
   currentTeam: 0
+--- !u!114 &741258068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284912227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31240d98240f0404e9889d82823d2ce0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrOrigin: {fileID: 284912227}
+  calibrationPoint1: {fileID: 958363330}
+  calibrationPoint3: {fileID: 958363330}
+  rightController: {fileID: 1793409813}
 --- !u!1001 &872196748
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1492,8 +1508,12 @@ PrefabInstance:
       value: -2.38
       objectReference: {fileID: 0}
     - target: {fileID: 3381143298729121279, guid: 98ec364904a5f4dd8a4e383ef45b7440, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 3381143298729121279, guid: 98ec364904a5f4dd8a4e383ef45b7440, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -12.11
+      value: -16.8
       objectReference: {fileID: 0}
     - target: {fileID: 3499743630322675667, guid: 98ec364904a5f4dd8a4e383ef45b7440, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2845,31 +2865,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3462571325970164595, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 741258061}
-    - targetCorrespondingSourceObject: {fileID: 2871854915733156399, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 3462571325970164595, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1825262784}
+      addedObject: {fileID: 741258068}
   m_SourcePrefab: {fileID: 100100000, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
---- !u!1 &1825262783 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2871854915733156399, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
-  m_PrefabInstance: {fileID: 1825262782}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1825262784
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1825262783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31240d98240f0404e9889d82823d2ce0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  xrOrigin: {fileID: 284912227}
-  calibrationPoint1: {fileID: 958363330}
-  calibrationPoint3: {fileID: 958363330}
-  rightController: {fileID: 1793409813}
 --- !u!1 &1830377368 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3353501808085126717, guid: 61bc641b0bb727149804fc8ae55a1fbb, type: 3}
