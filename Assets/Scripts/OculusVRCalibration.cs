@@ -1,6 +1,6 @@
-using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR;
+using Unity.XR.CoreUtils;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class OculusVRCalibration : MonoBehaviour
@@ -18,6 +18,9 @@ public class OculusVRCalibration : MonoBehaviour
     private float lastCalibrationTime = 0.0f;
 
     private XRNode oculusNode = XRNode.Head;
+    private int currentCalibrationIndex = 0;
+    private Vector3[] calibrationPoints = new Vector3[2];
+    private bool isControllerCalibration = false;
 
     void Start()
     {
@@ -41,15 +44,7 @@ public class OculusVRCalibration : MonoBehaviour
 
             if (buttonHoldTimer >= buttonHoldTime)
             {
-                if (!isCalibrated)
-                {
-                    CalibratePosition();
-                }
-                else if (Time.time - lastCalibrationTime > calibrationCooldown)
-                {
-                    CalibrateOrientation();
-                }
-
+                CalibrateScene(!isControllerCalibration);
                 isButtonHeld = false;
             }
         }
@@ -59,32 +54,41 @@ public class OculusVRCalibration : MonoBehaviour
         }
     }
 
-    private void CalibratePosition()
+    private void CalibrateScene(bool toControllerCalibration)
     {
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
 
-        // Рассчитываем среднее смещение между двумя точками калибровки и камерой
-        Vector3 cameraOffset1 = Camera.main.transform.position - calibrationPoint1.transform.position;
-        Vector3 cameraOffset2 = Camera.main.transform.position - calibrationPoint2.transform.position;
-        Vector3 cameraOffset = (cameraOffset1 + cameraOffset2) / 2f;
+        if (!isCalibrated)
+        {
+            calibrationPoints[currentCalibrationIndex] = calibrationPoint1.transform.position;
+            currentCalibrationIndex = (currentCalibrationIndex + 1) % 2;
+            calibrationPoints[currentCalibrationIndex] = calibrationPoint2.transform.position;
+            isControllerCalibration = toControllerCalibration;
+            Debug.Log($"Calibration Points set. Controller Calibration: {isControllerCalibration}");
+        }
+        else
+        {
+            Vector3 cameraOffset1 = calibrationPoint1.transform.position - calibrationPoints[0];
+            Vector3 cameraOffset2 = calibrationPoint2.transform.position - calibrationPoints[1];
+            Vector3 cameraOffset = isControllerCalibration ? (cameraOffset1 + cameraOffset2) / 2f : cameraOffset1;
 
-        xrOrigin.transform.position = oculusPosition - cameraOffset;
+            xrOrigin.transform.position = oculusPosition - cameraOffset;
 
-        isCalibrated = true;
+            if (isControllerCalibration)
+            {
+                Vector3 directionToController = rightController.transform.position - calibrationPoint1.transform.position;
+                directionToController.y = 0;
+
+                Quaternion currentSceneRotation = xrOrigin.transform.rotation;
+                Quaternion targetSceneRotation = Quaternion.LookRotation(directionToController);
+                xrOrigin.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
+            }
+
+            Debug.Log(isControllerCalibration ? "Scene calibrated to face the Right Controller." : "Scene calibrated to face the Head.");
+        }
+
+        isCalibrated = !isCalibrated;
         lastCalibrationTime = Time.time;
-        Debug.Log("Scene calibrated to position between Calibration Points.");
-    }
-
-    private void CalibrateOrientation()
-    {
-        Vector3 directionToController = rightController.transform.position - Camera.main.transform.position;
-        directionToController.y = 0;
-
-        Quaternion currentSceneRotation = xrOrigin.transform.rotation;
-        Quaternion targetSceneRotation = Quaternion.LookRotation(directionToController);
-        xrOrigin.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
-
-        Debug.Log("Scene orientation calibrated to face the Right Controller.");
     }
 
     private void ResetSceneTransform()
