@@ -1,10 +1,11 @@
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR;
-using Unity.XR.CoreUtils;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class OculusVRCalibration : MonoBehaviour
 {
+    public GameObject player;
     public GameObject calibrationPoint1;
     public GameObject calibrationPoint2;
     public ActionBasedController rightController;
@@ -22,12 +23,12 @@ public class OculusVRCalibration : MonoBehaviour
     private Vector3[] calibrationPoints = new Vector3[2];
     private bool isControllerCalibration = false;
 
-    void Start()
+    private void Start()
     {
         ResetSceneTransform();
     }
 
-    void Update()
+    private void Update()
     {
         bool primaryButtonPressed = rightController.activateAction.action.ReadValue<float>() > 0.5f;
         bool secondaryButtonPressed = rightController.uiPressAction.action.ReadValue<float>() > 0.5f;
@@ -72,16 +73,16 @@ public class OculusVRCalibration : MonoBehaviour
             Vector3 cameraOffset2 = calibrationPoint2.transform.position - calibrationPoints[1];
             Vector3 cameraOffset = isControllerCalibration ? (cameraOffset1 + cameraOffset2) / 2f : cameraOffset1;
 
-            xrOrigin.transform.position = oculusPosition - cameraOffset;
+            player.transform.position = oculusPosition - cameraOffset;
 
             if (isControllerCalibration)
             {
                 Vector3 directionToController = rightController.transform.position - calibrationPoint1.transform.position;
                 directionToController.y = 0;
 
-                Quaternion currentSceneRotation = xrOrigin.transform.rotation;
+                Quaternion currentSceneRotation = player.transform.rotation;
                 Quaternion targetSceneRotation = Quaternion.LookRotation(directionToController);
-                xrOrigin.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
+                player.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
             }
 
             Debug.Log(isControllerCalibration ? "Scene calibrated to face the Right Controller." : "Scene calibrated to face the Head.");
@@ -95,6 +96,6 @@ public class OculusVRCalibration : MonoBehaviour
     {
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.deviceRotation, out var oculusRotation);
-        xrOrigin.transform.SetPositionAndRotation(oculusPosition, oculusRotation);
+        player.transform.SetPositionAndRotation(oculusPosition, oculusRotation);
     }
 }
