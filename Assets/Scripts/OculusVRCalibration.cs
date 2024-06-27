@@ -58,6 +58,7 @@ public class OculusVRCalibration : MonoBehaviour
     private void CalibrateScene(bool toControllerCalibration)
     {
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
+        InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.deviceRotation, out var oculusRotation);
 
         if (!isCalibrated)
         {
@@ -96,6 +97,8 @@ public class OculusVRCalibration : MonoBehaviour
     {
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.deviceRotation, out var oculusRotation);
-        player.transform.SetPositionAndRotation(oculusPosition, oculusRotation);
+
+        // Устанавливаем правильную начальную позицию и ориентацию игрока
+        player.transform.SetPositionAndRotation(oculusPosition, Quaternion.Euler(oculusRotation.eulerAngles.x, oculusRotation.eulerAngles.y, oculusRotation.eulerAngles.z));
     }
 }

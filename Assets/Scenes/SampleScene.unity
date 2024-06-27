@@ -1122,6 +1122,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 425183917}
     m_Modifications:
+    - target: {fileID: 771160117365831604, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[0]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 771160117365831604, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[1]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 771160117365831604, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[2]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 771160117365831604, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_StartingInteractionOverridesMap.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4740606111464273957, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -1170,6 +1186,38 @@ PrefabInstance:
       propertyPath: m_Name
       value: 'XR Origin (XR Rig) '
       objectReference: {fileID: 0}
+    - target: {fileID: 6223651362249912967, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_AttachTransform
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6223651362249912967, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_RayOriginTransform
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6559752214364213942, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[0]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6559752214364213942, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[1]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6559752214364213942, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[2]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6559752214364213942, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_StartingInteractionOverridesMap.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8638474582618147098, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_AttachTransform
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8638474582618147098, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_RayOriginTransform
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 9020931445336970546, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
       propertyPath: player
       value: 
@@ -1184,7 +1232,16 @@ PrefabInstance:
       objectReference: {fileID: 408330151}
     m_RemovedComponents:
     - {fileID: 9020931445336970546, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8104709777807414481, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 8638474582618147094, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 2955010086717553625, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 8535464780082677091, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 6010494954321375672, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 6205224395904871695, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 3077116845676947282, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 313436327510865046, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - {fileID: 8257056603733693857, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4740606111464273958, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
