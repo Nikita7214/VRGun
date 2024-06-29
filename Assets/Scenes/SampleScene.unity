@@ -618,23 +618,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0cb9aa70a22847b5925ee5f067c10a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &448401051
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 448401044}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31240d98240f0404e9889d82823d2ce0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 636652311}
-  calibrationPoint1: {fileID: 958363330}
-  calibrationPoint2: {fileID: 408330151}
-  rightController: {fileID: 1718079543}
-  xrOrigin: {fileID: 448401046}
 --- !u!1001 &456243725
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -747,6 +730,23 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6205224396391702906, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
   m_PrefabInstance: {fileID: 1145501836}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &636652312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 636652311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31240d98240f0404e9889d82823d2ce0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 448401044}
+  calibrationPoint1: {fileID: 958363330}
+  calibrationPoint2: {fileID: 408330151}
+  rightController: {fileID: 1718079543}
+  xrOrigin: {fileID: 448401046}
 --- !u!1 &682591479 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3256568923514548448, guid: a71ea9ef9b659a24f8107f8b0b13cdce, type: 3}
@@ -1138,6 +1138,22 @@ PrefabInstance:
       propertyPath: m_StartingInteractionOverridesMap.Array.size
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1425043143971193962, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_RayInteractors.Array.data[0].m_Interactor
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1425043143971193962, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_RayInteractors.Array.data[1].m_Interactor
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1425043143971193962, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_RayInteractors.Array.data[2].m_Interactor
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1425043143971193962, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+      propertyPath: m_RayInteractors.Array.data[3].m_Interactor
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4740606111464273957, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -1244,9 +1260,9 @@ PrefabInstance:
     - {fileID: 8257056603733693857, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4740606111464273958, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 6205224396391702906, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 448401051}
+      addedObject: {fileID: 636652312}
   m_SourcePrefab: {fileID: 100100000, guid: 6790746ca19824a0c95b26212dff209f, type: 3}
 --- !u!1001 &1226947868
 PrefabInstance:
