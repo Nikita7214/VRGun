@@ -62,7 +62,9 @@ public class OculusVRCalibration : MonoBehaviour
 
         if (!isCalibrated)
         {
+            // Установка первой точки калибровки, направленной на вторую
             calibrationPoints[currentCalibrationIndex] = calibrationPoint1.transform.position;
+            calibrationPoint1.transform.LookAt(calibrationPoint2.transform);
             currentCalibrationIndex = (currentCalibrationIndex + 1) % 2;
             calibrationPoints[currentCalibrationIndex] = calibrationPoint2.transform.position;
             isControllerCalibration = toControllerCalibration;
@@ -70,9 +72,7 @@ public class OculusVRCalibration : MonoBehaviour
         }
         else
         {
-            Vector3 cameraOffset1 = calibrationPoint1.transform.position - calibrationPoints[0];
-            Vector3 cameraOffset2 = calibrationPoint2.transform.position - calibrationPoints[1];
-            Vector3 cameraOffset = isControllerCalibration ? (cameraOffset1 + cameraOffset2) / 2f : cameraOffset1;
+            Vector3 cameraOffset = isControllerCalibration ? (calibrationPoints[0] + calibrationPoints[1]) / 2f - oculusPosition : calibrationPoints[0] - oculusPosition;
 
             player.transform.position = oculusPosition - cameraOffset;
 
@@ -84,6 +84,10 @@ public class OculusVRCalibration : MonoBehaviour
                 Quaternion currentSceneRotation = player.transform.rotation;
                 Quaternion targetSceneRotation = Quaternion.LookRotation(directionToController);
                 player.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
+            }
+            else
+            {
+                player.transform.rotation = Quaternion.Euler(oculusRotation.eulerAngles.x, oculusRotation.eulerAngles.y, oculusRotation.eulerAngles.z);
             }
 
             Debug.Log(isControllerCalibration ? "Scene calibrated to face the Right Controller." : "Scene calibrated to face the Head.");
