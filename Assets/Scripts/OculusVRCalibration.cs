@@ -15,17 +15,17 @@ public class OculusVRCalibration : MonoBehaviour
     private bool isButtonHeld = false;
     private float buttonHoldTime = 3.0f;
     private float buttonHoldTimer = 0.0f;
-    private float calibrationCooldown = 2.0f;
     private float lastCalibrationTime = 0.0f;
 
     private XRNode oculusNode = XRNode.Head;
-    private int currentCalibrationIndex = 0;
-    private Vector3[] calibrationPoints = new Vector3[2];
-    private bool isControllerCalibration = false;
+    private Vector3 initialPlayerPosition = new(74.05929f, 5.05f, -29);
+    private Quaternion initialPlayerRotation = new(0, -214.661f, 0, 0);
 
     private void Start()
     {
-        ResetSceneTransform();
+        // Сохраняем начальные положение и ориентацию игрока
+        initialPlayerPosition = player.transform.position;
+        initialPlayerRotation = player.transform.rotation;
     }
 
     private void Update()
@@ -45,7 +45,7 @@ public class OculusVRCalibration : MonoBehaviour
 
             if (buttonHoldTimer >= buttonHoldTime)
             {
-                CalibrateScene(!isControllerCalibration);
+                CalibrateScene();
                 isButtonHeld = false;
             }
         }
@@ -55,54 +55,28 @@ public class OculusVRCalibration : MonoBehaviour
         }
     }
 
-    private void CalibrateScene(bool toControllerCalibration)
+    private void CalibrateScene()
     {
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
         InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.deviceRotation, out var oculusRotation);
 
         if (!isCalibrated)
         {
-            // Установка первой точки калибровки, направленной на вторую
-            calibrationPoints[currentCalibrationIndex] = calibrationPoint1.transform.position;
-            calibrationPoint1.transform.LookAt(calibrationPoint2.transform);
-            currentCalibrationIndex = (currentCalibrationIndex + 1) % 2;
-            calibrationPoints[currentCalibrationIndex] = calibrationPoint2.transform.position;
-            isControllerCalibration = toControllerCalibration;
-            Debug.Log($"Calibration Points set. Controller Calibration: {isControllerCalibration}");
+            // Вычисляем положение игрока, основываясь на положении Oculus
+            player.transform.position = oculusPosition;
+            player.transform.rotation = Quaternion.Euler(oculusRotation.eulerAngles.x, oculusRotation.eulerAngles.y, oculusRotation.eulerAngles.z);
+
+            Debug.Log("Calibration completed. Player position and rotation set.");
         }
         else
         {
-            Vector3 cameraOffset = isControllerCalibration ? (calibrationPoints[0] + calibrationPoints[1]) / 2f - oculusPosition : calibrationPoints[0] - oculusPosition;
+            // Возвращаем игрока в начальное положение и ориентацию
+            player.transform.SetPositionAndRotation(initialPlayerPosition, initialPlayerRotation);
 
-            player.transform.position = oculusPosition - cameraOffset;
-
-            if (isControllerCalibration)
-            {
-                Vector3 directionToController = rightController.transform.position - calibrationPoint1.transform.position;
-                directionToController.y = 0;
-
-                Quaternion currentSceneRotation = player.transform.rotation;
-                Quaternion targetSceneRotation = Quaternion.LookRotation(directionToController);
-                player.transform.rotation = targetSceneRotation * Quaternion.Inverse(currentSceneRotation);
-            }
-            else
-            {
-                player.transform.rotation = Quaternion.Euler(oculusRotation.eulerAngles.x, oculusRotation.eulerAngles.y, oculusRotation.eulerAngles.z);
-            }
-
-            Debug.Log(isControllerCalibration ? "Scene calibrated to face the Right Controller." : "Scene calibrated to face the Head.");
+            Debug.Log("Calibration reset. Player returned to initial position and rotation.");
         }
 
         isCalibrated = !isCalibrated;
         lastCalibrationTime = Time.time;
-    }
-
-    private void ResetSceneTransform()
-    {
-        InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.devicePosition, out var oculusPosition);
-        InputDevices.GetDeviceAtXRNode(oculusNode).TryGetFeatureValue(CommonUsages.deviceRotation, out var oculusRotation);
-
-        // Устанавливаем правильную начальную позицию и ориентацию игрока
-        player.transform.SetPositionAndRotation(oculusPosition, Quaternion.Euler(oculusRotation.eulerAngles.x, oculusRotation.eulerAngles.y, oculusRotation.eulerAngles.z));
     }
 }
