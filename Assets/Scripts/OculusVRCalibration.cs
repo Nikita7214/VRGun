@@ -1,93 +1,83 @@
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.InputSystem;
+using UnityEngine.XR;
+using InputDevice = UnityEngine.InputSystem.InputDevice;
 
 public class OculusVRCalibration : MonoBehaviour
 {
-    [SerializeField] private Transform resetTransform1;
-    [SerializeField] private Transform resetTransform2;
-    [SerializeField] private GameObject player;
-    [SerializeField] private Camera playerHead;
+    [SerializeField] Transform calibrationPointA;
+    [SerializeField] Transform calibrationPointB;
+    [SerializeField] InputActionReference rightControllerActivate;
+    [SerializeField] InputActionReference rightControllerUiPress;
+    [SerializeField] GameObject player;
+    [SerializeField] Camera playerHead;
 
-    private ActionBasedController rightController;
+    private bool isCalibrating = false;
+    private float calibrationTimer = 0f;
+    private const float calibrationDuration = 3f;
 
-    private bool primaryButtonPressed = false;
-    private bool secondaryButtonPressed = false;
-
-    private bool isResettingPosition = false;
-    private float resetPositionTimer = 0f;
-    private const float resetPositionDelay = 3f;
-
-    private bool isUsingResetTransform1 = true;
-
-    private void Start()
+    void Update()
     {
-        if (player != null)
-        {
-            rightController = player.GetComponent<ActionBasedController>();
-            if (rightController == null)
-            {
-                Debug.LogError("OculusVRCalibration: 'player' GameObject does not have an ActionBasedController component.");
-            }
-        }
-        else
-        {
-            Debug.LogError("OculusVRCalibration: 'player' GameObject is not assigned.");
-        }
-    }
+        // Проверяем, нажаты ли кнопки A и B на правом контроллере
+        bool primaryButtonPressed = rightControllerActivate.action.ReadValue<float>() > 0.5f;
+        bool secondaryButtonPressed = rightControllerUiPress.action.ReadValue<float>() > 0.5f;
 
-    private void Update()
-    {
-        if (rightController != null && player != null && playerHead != null)
+        if (primaryButtonPressed && secondaryButtonPressed)
         {
-            // Проверяем состояния кнопок
-            primaryButtonPressed = rightController.activateAction.action.ReadValue<float>() > 0.5f;
-            secondaryButtonPressed = rightController.uiPressAction.action.ReadValue<float>() > 0.5f;
-
-            // Проверяем, если кнопки A и B зажаты
-            if (primaryButtonPressed && secondaryButtonPressed)
+            if (!isCalibrating)
             {
-                if (!isResettingPosition)
-                {
-                    isResettingPosition = true;
-                    resetPositionTimer = resetPositionDelay;
-                    isUsingResetTransform1 = !isUsingResetTransform1;
-                }
+                StartCalibration();
             }
             else
             {
-                isResettingPosition = false;
+                CompleteCalibration();
             }
+        }
 
-            // Обновляем таймер сброса позиции
-            if (isResettingPosition)
+        if (isCalibrating)
+        {
+            calibrationTimer += Time.deltaTime;
+            if (calibrationTimer >= calibrationDuration)
             {
-                resetPositionTimer -= Time.deltaTime;
-                if (resetPositionTimer <= 0f)
-                {
-                    ResetPosition();
-                }
+                CompleteCalibration();
             }
         }
     }
 
+    private void StartCalibration()
+    {
+        isCalibrating = true;
+        calibrationTimer = 0f;
+
+        // Перемещаем игрока на первую точку калибровки
+        ResetPosition();
+    }
+
+    private void CompleteCalibration()
+    {
+        isCalibrating = false;
+        calibrationTimer = 0f;
+
+        // Разворачиваем взгляд игрока с учетом второй точки калибровки относительно первой
+        Vector3 calibrationPointA = playerHead.transform.position;
+
+        UnityEngine.XR.InputDevice rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        if (rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out Vector3 controllerPosition))
+        {
+            Vector3 calibrationPointB = controllerPosition;
+            Vector3 calibrationDirection = calibrationPointB - calibrationPointA;
+            Quaternion targetRotation = Quaternion.LookRotation(calibrationDirection, Vector3.up);
+            playerHead.transform.rotation = Quaternion.Slerp(playerHead.transform.rotation, targetRotation, 1f);
+        }
+    }
     private void ResetPosition()
     {
-        if (resetTransform1 != null && resetTransform2 != null && playerHead != null && player != null)
-        {
-            // Поворачиваем игрока относительно текущего resetTransform
-            var currentResetTransform = isUsingResetTransform1 ? resetTransform1 : resetTransform2;
-            var rotationAngleY = currentResetTransform.rotation.eulerAngles.y -
-                                 playerHead.transform.rotation.eulerAngles.y;
-            player.transform.Rotate(xAngle: 0, rotationAngleY, zAngle: 0);
+        var rotationAngleY = calibrationPointA.rotation.eulerAngles.y -
+                             playerHead.transform.rotation.eulerAngles.y;
+        player.transform.Rotate(xAngle: 0, rotationAngleY, zAngle: 0);
 
-            // Перемещаем игрока в позицию текущего resetTransform
-            var distanceDiff = currentResetTransform.position -
-                               playerHead.transform.position;
-            player.transform.position += distanceDiff;
-        }
-        else
-        {
-            Debug.LogError("OculusVRCalibration: One or more of the required transforms are not assigned.");
-        }
+        var distanceDiff = calibrationPointA.position -
+                           playerHead.transform.position;
+        player.transform.position += distanceDiff;
     }
 }
