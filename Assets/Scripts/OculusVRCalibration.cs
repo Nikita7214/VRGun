@@ -3,12 +3,12 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class OculusVRCalibration : MonoBehaviour
 {
-    [SerializeField] Transform resetTransform1;
-    [SerializeField] Transform resetTransform2;
-    [SerializeField] GameObject player;
-    [SerializeField] Camera playerHead;
+    [SerializeField] private Transform resetTransform1;
+    [SerializeField] private Transform resetTransform2;
+    [SerializeField] private GameObject player;
+    [SerializeField] private Camera playerHead;
 
-    [SerializeField] private ActionBasedController rightController;
+    private ActionBasedController rightController;
 
     private bool primaryButtonPressed = false;
     private bool secondaryButtonPressed = false;
@@ -17,66 +17,77 @@ public class OculusVRCalibration : MonoBehaviour
     private float resetPositionTimer = 0f;
     private const float resetPositionDelay = 3f;
 
+    private bool isUsingResetTransform1 = true;
+
     private void Start()
     {
-        rightController = player.GetComponent<ActionBasedController>();
-    }
-
-    private void Update()
-    {
-        // Проверяем состояния кнопок
-        primaryButtonPressed = rightController.activateAction.action.ReadValue<float>() > 0.5f;
-        secondaryButtonPressed = rightController.uiPressAction.action.ReadValue<float>() > 0.5f;
-
-        // Проверяем, если кнопки A и B зажаты
-        if (primaryButtonPressed && secondaryButtonPressed)
+        if (player != null)
         {
-            if (!isResettingPosition)
+            rightController = player.GetComponent<ActionBasedController>();
+            if (rightController == null)
             {
-                isResettingPosition = true;
-                resetPositionTimer = resetPositionDelay;
+                Debug.LogError("OculusVRCalibration: 'player' GameObject does not have an ActionBasedController component.");
             }
         }
         else
         {
-            isResettingPosition = false;
+            Debug.LogError("OculusVRCalibration: 'player' GameObject is not assigned.");
         }
+    }
 
-        // Обновляем таймер сброса позиции
-        if (isResettingPosition)
+    private void Update()
+    {
+        if (rightController != null && player != null && playerHead != null)
         {
-            resetPositionTimer -= Time.deltaTime;
-            if (resetPositionTimer <= 0f)
+            // Проверяем состояния кнопок
+            primaryButtonPressed = rightController.activateAction.action.ReadValue<float>() > 0.5f;
+            secondaryButtonPressed = rightController.uiPressAction.action.ReadValue<float>() > 0.5f;
+
+            // Проверяем, если кнопки A и B зажаты
+            if (primaryButtonPressed && secondaryButtonPressed)
             {
-                ResetPositionToTransform1();
-                ResetPositionToTransform2();
+                if (!isResettingPosition)
+                {
+                    isResettingPosition = true;
+                    resetPositionTimer = resetPositionDelay;
+                    isUsingResetTransform1 = !isUsingResetTransform1;
+                }
+            }
+            else
+            {
+                isResettingPosition = false;
+            }
+
+            // Обновляем таймер сброса позиции
+            if (isResettingPosition)
+            {
+                resetPositionTimer -= Time.deltaTime;
+                if (resetPositionTimer <= 0f)
+                {
+                    ResetPosition();
+                }
             }
         }
     }
 
-    private void ResetPositionToTransform1()
+    private void ResetPosition()
     {
-        // Поворачиваем игрока относительно resetTransform2
-        var rotationAngleY = resetTransform2.rotation.eulerAngles.y -
-                             playerHead.transform.rotation.eulerAngles.y;
-        player.transform.Rotate(xAngle: 0, rotationAngleY, zAngle: 0);
+        if (resetTransform1 != null && resetTransform2 != null && playerHead != null && player != null)
+        {
+            // Поворачиваем игрока относительно текущего resetTransform
+            var currentResetTransform = isUsingResetTransform1 ? resetTransform1 : resetTransform2;
+            var rotationAngleY = currentResetTransform.rotation.eulerAngles.y -
+                                 playerHead.transform.rotation.eulerAngles.y;
+            player.transform.Rotate(xAngle: 0, rotationAngleY, zAngle: 0);
 
-        // Перемещаем игрока в позицию resetTransform1
-        var distanceDiff = resetTransform1.position -
-                           playerHead.transform.position;
-        player.transform.position += distanceDiff;
-    }
-
-    private void ResetPositionToTransform2()
-    {
-        // Поворачиваем игрока относительно resetTransform1
-        var rotationAngleY = resetTransform1.rotation.eulerAngles.y -
-                             playerHead.transform.rotation.eulerAngles.y;
-        player.transform.Rotate(xAngle: 0, rotationAngleY, zAngle: 0);
-
-        // Перемещаем игрока в позицию resetTransform2
-        var distanceDiff = resetTransform2.position -
-                           playerHead.transform.position;
-        player.transform.position += distanceDiff;
+            // Перемещаем игрока в позицию текущего resetTransform
+            var distanceDiff = currentResetTransform.position -
+                               playerHead.transform.position;
+            player.transform.position += distanceDiff;
+        }
+        else
+        {
+            Debug.LogError("OculusVRCalibration: One or more of the required transforms are not assigned.");
+        }
     }
 }
