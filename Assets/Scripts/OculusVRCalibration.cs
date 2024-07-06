@@ -5,18 +5,20 @@ using InputDevice = UnityEngine.InputSystem.InputDevice;
 
 public class OculusVRCalibration : MonoBehaviour
 {
-    [SerializeField] Transform calibrationPointA;
-    [SerializeField] Transform calibrationPointB;
+    [SerializeField] private Transform calibrationPointA;
+    [SerializeField] private Transform calibrationPointB;
+    [SerializeField] private Transform calibrationPointC;
     [SerializeField] InputActionReference rightControllerActivate;
     [SerializeField] InputActionReference rightControllerUiPress;
     [SerializeField] GameObject player;
     [SerializeField] Camera playerHead;
 
     private bool isCalibrating = false;
+    private bool isCalibrated = false;
     private float calibrationTimer = 0f;
     private const float calibrationDuration = 3f;
 
-    void Update()
+    private void Update()
     {
         // Проверяем, нажаты ли кнопки A и B на правом контроллере
         bool primaryButtonPressed = rightControllerActivate.action.ReadValue<float>() > 0.5f;
@@ -28,9 +30,9 @@ public class OculusVRCalibration : MonoBehaviour
             {
                 StartCalibration();
             }
-            else
+            else if (isCalibrated)
             {
-                CompleteCalibration();
+                PerformCalibrationAction();
             }
         }
 
@@ -50,34 +52,57 @@ public class OculusVRCalibration : MonoBehaviour
         calibrationTimer = 0f;
 
         // Перемещаем игрока на первую точку калибровки
-        ResetPosition();
+        ResetPosition(calibrationPointA);
     }
 
     private void CompleteCalibration()
     {
         isCalibrating = false;
+        isCalibrated = true;
         calibrationTimer = 0f;
 
         // Разворачиваем взгляд игрока с учетом второй точки калибровки относительно первой
-        Vector3 calibrationPointA = playerHead.transform.position;
-
-        UnityEngine.XR.InputDevice rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-        if (rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out Vector3 controllerPosition))
-        {
-            Vector3 calibrationPointB = controllerPosition;
-            Vector3 calibrationDirection = calibrationPointB - calibrationPointA;
-            Quaternion targetRotation = Quaternion.LookRotation(calibrationDirection, Vector3.up);
-            playerHead.transform.rotation = Quaternion.Slerp(playerHead.transform.rotation, targetRotation, 1f);
-        }
+        SetCameraRotation(calibrationPointA, calibrationPointB);
+        
+        // Устанавливаем высоту пола по положению правого контроллера
+        SetFloorHeight();
     }
-    private void ResetPosition()
+
+    private void PerformCalibrationAction()
     {
-        var rotationAngleY = calibrationPointA.rotation.eulerAngles.y -
+        // Перемещаем игрока к третьей точке калибровки
+        ResetPosition(calibrationPointC);
+
+        // Разворачиваем взгляд игрока в направлении от контроллера к третьей точке
+        SetCameraRotation(calibrationPointB, calibrationPointC);
+    }
+
+    private void ResetPosition(Transform targetPosition)
+    {
+        var rotationAngleY = targetPosition.rotation.eulerAngles.y -
                              playerHead.transform.rotation.eulerAngles.y;
         player.transform.Rotate(xAngle: 0, rotationAngleY, zAngle: 0);
 
-        var distanceDiff = calibrationPointA.position -
+        var distanceDiff = targetPosition.position -
                            playerHead.transform.position;
         player.transform.position += distanceDiff;
+    }
+
+    private void SetCameraRotation(Transform pointA, Transform pointB)
+    {
+        Vector3 calibrationPointA = pointA.position;
+        Vector3 calibrationPointB = pointB.position;
+        Vector3 calibrationDirection = calibrationPointB - calibrationPointA;
+        Quaternion targetRotation = Quaternion.LookRotation(calibrationDirection, Vector3.up);
+        playerHead.transform.rotation = Quaternion.Slerp(playerHead.transform.rotation, targetRotation, 1f);
+    }
+
+    private void SetFloorHeight()
+    {
+        UnityEngine.XR.InputDevice rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        if (rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out Vector3 controllerPosition))
+        {
+            player.transform.position = new Vector3(player.transform.position.x, controllerPosition.y, player.transform.position.z);
+        }
     }
 }
