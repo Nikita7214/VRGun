@@ -5,9 +5,9 @@ using InputDevice = UnityEngine.InputSystem.InputDevice;
 
 public class OculusVRCalibration : MonoBehaviour
 {
-    [SerializeField] private Transform calibrationPointA;
-    [SerializeField] private Transform calibrationPointB;
-    [SerializeField] private Transform calibrationPointC;
+    [SerializeField] Transform calibrationPointA;
+    [SerializeField] Transform calibrationPointB;
+    [SerializeField] Transform calibrationPointC;
     [SerializeField] InputActionReference rightControllerActivate;
     [SerializeField] InputActionReference rightControllerUiPress;
     [SerializeField] GameObject player;
@@ -17,8 +17,10 @@ public class OculusVRCalibration : MonoBehaviour
     private bool isCalibrated = false;
     private float calibrationTimer = 0f;
     private const float calibrationDuration = 3f;
+    private float buttonPressedTime = 0f;
+    private bool isButtonPressed = false;
 
-    private void Update()
+    void Update()
     {
         // Проверяем, нажаты ли кнопки A и B на правом контроллере
         bool primaryButtonPressed = rightControllerActivate.action.ReadValue<float>() > 0.5f;
@@ -26,9 +28,11 @@ public class OculusVRCalibration : MonoBehaviour
 
         if (primaryButtonPressed && secondaryButtonPressed)
         {
-            if (!isCalibrating)
+            if (!isCalibrating && !isButtonPressed)
             {
                 StartCalibration();
+                isButtonPressed = true;
+                buttonPressedTime = Time.time;
             }
             else if (isCalibrated)
             {
@@ -42,6 +46,17 @@ public class OculusVRCalibration : MonoBehaviour
             if (calibrationTimer >= calibrationDuration)
             {
                 CompleteCalibration();
+            }
+        }
+
+        // Проверяем, сколько времени кнопка была нажата
+        if (isButtonPressed)
+        {
+            if (Time.time - buttonPressedTime >= 3f)
+            {
+                // Кнопка была нажата в течение 3 секунд
+                MoveToTarget();
+                isButtonPressed = false;
             }
         }
     }
@@ -75,6 +90,12 @@ public class OculusVRCalibration : MonoBehaviour
 
         // Разворачиваем взгляд игрока в направлении от контроллера к третьей точке
         SetCameraRotation(calibrationPointB, calibrationPointC);
+    }
+
+    private void MoveToTarget()
+    {
+        // Код для перемещения на целевую точку
+        transform.position = calibrationPointC.position;
     }
 
     private void ResetPosition(Transform targetPosition)
