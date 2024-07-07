@@ -17,8 +17,6 @@ public class OculusVRCalibration : MonoBehaviour
     private bool isCalibrated = false;
     private float calibrationTimer = 0f;
     private const float calibrationDuration = 3f;
-    private float buttonPressedTime = 0f;
-    private bool isButtonPressed = false;
 
     void Update()
     {
@@ -28,11 +26,9 @@ public class OculusVRCalibration : MonoBehaviour
 
         if (primaryButtonPressed && secondaryButtonPressed)
         {
-            if (!isCalibrating && !isButtonPressed)
+            if (!isCalibrating)
             {
                 StartCalibration();
-                isButtonPressed = true;
-                buttonPressedTime = Time.time;
             }
             else if (isCalibrated)
             {
@@ -46,17 +42,6 @@ public class OculusVRCalibration : MonoBehaviour
             if (calibrationTimer >= calibrationDuration)
             {
                 CompleteCalibration();
-            }
-        }
-
-        // Проверяем, сколько времени кнопка была нажата
-        if (isButtonPressed)
-        {
-            if (Time.time - buttonPressedTime >= 3f)
-            {
-                // Кнопка была нажата в течение 3 секунд
-                MoveToTarget();
-                isButtonPressed = false;
             }
         }
     }
@@ -90,12 +75,6 @@ public class OculusVRCalibration : MonoBehaviour
 
         // Разворачиваем взгляд игрока в направлении от контроллера к третьей точке
         SetCameraRotation(calibrationPointB, calibrationPointC);
-    }
-
-    private void MoveToTarget()
-    {
-        // Код для перемещения на целевую точку
-        transform.position = calibrationPointC.position;
     }
 
     private void ResetPosition(Transform targetPosition)
